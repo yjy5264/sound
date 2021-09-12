@@ -1,11 +1,14 @@
-import React, { FC } from 'react';
+import * as React from 'react';
 import { Button } from 'antd';
 import './App.css';
+import useGetSound from './hooks/useGetSound';
 
-const App: FC = () => (
-    <div className="App">
-        <Button type="primary">Button</Button>
+const App = () => {
+    const [play, setPlay] = useGetSound()
+
+    return <div className="App">
+        <Button type="primary" onClick={() => setPlay(true)}>Button</Button>
     </div>
-);
+};
 
 export default App;
