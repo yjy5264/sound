@@ -1,6 +1,7 @@
 import * as React from "react";
 
 export default function useGetSound():[boolean, React.Dispatch<React.SetStateAction<boolean>>] {
+    const [mediaRecorder, setMediaRecorder] = React.useState<MediaRecorder>();
     const [chunks, setChunks] = React.useState<BlobPart[]>([])
     const [play, setPlay] = React.useState(false);
 
@@ -20,43 +21,42 @@ export default function useGetSound():[boolean, React.Dispatch<React.SetStateAct
             }
     }
 
-    const bindEvents = (target: MediaRecorder) => {
-        target.addEventListener("dataavailable", (e) => {
-            const _chunks = chunks.concat(e.data)
+    const initStream = async () => {
+        const _stream = await getUserAuthI();
+        if (!_stream) return;
+        const _mediaRecorder = new MediaRecorder(_stream);
+        setMediaRecorder(_mediaRecorder);
+    }
+
+    React.useEffect(() => {
+        initStream()
+    }, [])
+
+    React.useEffect(() => {
+        if (!mediaRecorder) return
+        mediaRecorder.ondataavailable = (e) => {
+            const _chunks = [...chunks];
+            _chunks.push(e.data)
             console.log(_chunks)
             setChunks(_chunks)
-        });
-
-        target.addEventListener("stop", (e) => {
-            const blob = new Blob(chunks, { type: "audio/ogg; codecs=opus" });
-            setChunks([])
-            // 转换成url
-            const audioURL = window.URL.createObjectURL(blob);
-
-            // 转换成文件
-            const fileName = Date.now().toString(32);
-            const fileType = "audio/ogg";
-            const file = new window.File([blob], fileName, { type: fileType });
-
-            // 下载
-            const a = document.createElement("a");
-            a.href = audioURL;
-            a.download = fileName;
-            a.click();
-        })
-    }
+        }
+        mediaRecorder.onstart = (e) => {
+            console.log("onstart", e)
+        }
+        mediaRecorder.onerror = (e) => {
+            console.log("onerror", e)
+        }
+    }, [mediaRecorder, chunks])
 
     const start = async () => {
         console.log("start")
-        const stream = await getUserAuthI();
-        if (!stream) return
-        const mediaRecorder = new MediaRecorder(stream); // stream为获取权限时,取到的stream
-        bindEvents(mediaRecorder);
+        if (!mediaRecorder) return
+        mediaRecorder.start(100);
     }
  
     React.useEffect(() => {
         if (play) start()
-    }, [play])
+    }, [play, mediaRecorder])
 
     return [play, setPlay];
 }
