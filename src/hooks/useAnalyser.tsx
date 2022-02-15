@@ -20,51 +20,10 @@ export default function useAnalyser() {
 
 	const draw = () => {
 		if (!analyser.current) return;
-		analyser.current.fftSize = 2048;
+		analyser.current.fftSize = 1024;
 		const bufferLength = analyser.current.frequencyBinCount;
 		let dataArray = new Uint8Array(bufferLength);
-		analyser.current.getByteTimeDomainData(dataArray);
-
-		const canvas = document.getElementById("oscilloscope") as HTMLCanvasElement
-		if (!canvas) return;
-		var canvasCtx = canvas.getContext("2d");
-		if (!canvasCtx) return;
-
-		canvasCtx.fillStyle = 'rgb(200, 200, 200)';
-		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-		canvasCtx.lineWidth = 2;
-		canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
-
-		canvasCtx.beginPath();
-
-		var sliceWidth = canvas.width * 1.0 / bufferLength;
-		var x = 0;
-
-		for (var i = 0; i < bufferLength; i++) {
-
-			var v = dataArray[i] / 128.0;
-			var y = v * canvas.height / 2;
-
-			if (i === 0) {
-				canvasCtx.moveTo(x, y);
-			} else {
-				canvasCtx.lineTo(x, y);
-			}
-
-			x += sliceWidth;
-		}
-
-		canvasCtx.lineTo(canvas.width, canvas.height / 2);
-		canvasCtx.stroke();
-	}
-
-	const draw2 = () => {
-		if (!analyser.current) return;
-		analyser.current.fftSize = 256;
-		const bufferLength = analyser.current.frequencyBinCount;
-		let dataArray = new Uint8Array(bufferLength);
-		analyser.current.getByteTimeDomainData(dataArray);
+		analyser.current.getByteFrequencyData(dataArray);
 
 		const canvas = document.getElementById("oscilloscope") as HTMLCanvasElement
 		if (!canvas) return;
@@ -77,13 +36,14 @@ export default function useAnalyser() {
 		var barWidth = (canvas.width / bufferLength) * 2.5;
 		var barHeight;
 		var x = 0;
-		for (var i = 0; i < bufferLength; i++) {
-			barHeight = dataArray[i] / 2;
 
-			canvasCtx.fillStyle = 'rgb(' + (barHeight + 100) + ',50,50)';
-			canvasCtx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight);
-
-			x += barWidth + 1;
+		for(var i = 0; i < bufferLength; i++) {
+		  barHeight = dataArray[i];
+	  
+		  canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
+		  canvasCtx.fillRect(x,canvas.height-barHeight/2,barWidth,barHeight/2);
+	  
+		  x += barWidth + 1;
 		}
 	}
 

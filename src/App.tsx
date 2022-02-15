@@ -15,7 +15,7 @@ const App = () => {
 
     return <div className="App">
         <Button type="primary" onClick={() => requestAnimationFrame(_draw)}>Button</Button>
-        
+        <canvas id="oscilloscope" style={{ width: 1024, height: 800 }} />
     </div>
 };
 
