@@ -18,9 +18,11 @@ const App = () => {
     hz2pitch(1)
 
     return <div className="App">
-        <canvas id="oscilloscope" style={{ width: 1024, height: 800 }} />
-        <h1>{hz.toFixed(3)}Hz</h1>
-        <h1>{hz2pitch(hz)}</h1>
+        <canvas id="oscilloscope" width="2560px" height= "800px" />
+        <div style={{ position: "absolute", top: 40, left: 40 }}>
+            <h1>{hz.toFixed(3)}Hz</h1>
+            <h1>{hz2pitch(hz)}</h1>
+        </div>
     </div>
 };
 

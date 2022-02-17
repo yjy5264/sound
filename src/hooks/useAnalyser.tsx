@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getColor } from "../utils";
 
 const MaxHz = 40500;
 
@@ -30,34 +31,40 @@ export default function useAnalyser(): [() => void, number] {
 
 		const canvas = document.getElementById("oscilloscope") as HTMLCanvasElement
 		if (!canvas) return;
-		var canvasCtx = canvas.getContext("2d");
+		const canvasCtx = canvas.getContext("2d");
 		if (!canvasCtx) return;
 
 		canvasCtx.fillStyle = 'rgb(200, 200, 200)';
 		canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
-		const _bufferLength = bufferLength / 6;
+		const line = 4000
+		const denominator = 40;
 
-		var barWidth = (canvas.width / _bufferLength) * 2.5;
-		var barHeight;
-		var x = 0;
+		const _bufferLength = bufferLength / denominator;
+
+		const barWidth = (canvas.width / _bufferLength);
 
 		let max = 0;
 		let index = 0;
 
-		for(var i = 0; i < _bufferLength; i++) {
-		    barHeight = dataArray[i];
+		for (let i = 0; i < _bufferLength; i++) {
+		    const barHeight = canvas.height * dataArray[i] / 255;
 
 			if (max < barHeight) {
 				max = barHeight;
 				index = i;
 			}
 		
-		    canvasCtx.fillStyle = 'rgb(' + (barHeight+100) + ',50,50)';
-		    canvasCtx.fillRect(x,canvas.height-barHeight/2,barWidth,barHeight/2);
-	  
-		    x += barWidth + 1;
+		    canvasCtx.fillStyle = getColor(dataArray[i]);
+		    canvasCtx.fillRect(barWidth * i, canvas.height - barHeight, barWidth, barHeight);
+		}
 
+		const currentLine = line / denominator;
+		for (let i = currentLine; i < (MaxHz / denominator); i += currentLine) {
+			const x = i / (MaxHz / denominator) * canvas.width;
+			canvasCtx.font="30px Arial";
+			canvasCtx.fillText(`${i}hz`, x - 100, 50);
+			canvasCtx.fillRect(x, 0, 1, canvas.height);
 		}
 
 		setHz(index / bufferLength * MaxHz)
